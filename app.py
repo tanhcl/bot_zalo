@@ -5,19 +5,26 @@ import datetime
 
 app = Flask(__name__)
 
-BOT_TOKEN = "YOUR_BOT_TOKEN"
+# LẤY TOKEN TỪ RENDER ENVIRONMENT
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
 SECRET_TOKEN = "12345678"
+
+print("BOT_TOKEN:", BOT_TOKEN)
+
 
 @app.route("/bot", methods=["POST"])
 def webhook():
-    # Verify secret token
+    # Kiểm tra secret token
     received_secret = request.headers.get("X-Bot-Api-Secret-Token")
     if received_secret != SECRET_TOKEN:
         return "Unauthorized", 403
 
     data = request.json
 
-    # Log
+    # Log debug
+    print("Received data:", data)
+
+    # Ghi log file (Render vẫn cho ghi file tạm)
     with open("log.txt", "a") as f:
         f.write(f"CALLED {datetime.datetime.now()}\n")
         f.write(str(data) + "\n\n")
@@ -41,15 +48,15 @@ def send_message(chat_id, text):
     }
 
     response = requests.post(url, json=payload)
-    print("Zalo response:", response.text)
+
+    print("=== SEND MESSAGE DEBUG ===")
+    print("URL:", url)
+    print("Payload:", payload)
+    print("Response:", response.text)
+    print("==========================")
 
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-print("BOT_TOKEN:", BOT_TOKEN)
-print("CHAT_ID:", chat_id)
-print("Response:", response.text)
-
-
