@@ -48,9 +48,8 @@ def webhook():
         reply = FAQ.handle_message(text)  # Gọi hàm xử lý tin nhắn từ FAQ.py
         
         if chat_type == "private":
-            if text == "/start":
-                for message in reply:
-                    send_message(chat_id, message)               
+            for message in reply:
+                send_message(chat_id, message)               
 
         elif chat_type == "group":
             reply = f"📢 {user_id} vừa nói trong nhóm: {text}"
@@ -78,3 +77,4 @@ def send_message(chat_id, text):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
