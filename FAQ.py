@@ -1,16 +1,19 @@
 FAQ = {
-    "tt1": ["👋 Xin chào!", "Tôi là trợ lý ảo của shop!", "Bạn có thể hỏi tôi về địa chỉ, giờ mở cửa, giao hàng và menu sản phẩm."],
-    "địa chỉ": "🏠 Shop ở 123 Nguyễn Văn A, TP.HCM",
-    "giờ mở cửa": "⏰ Shop mở cửa 8h - 22h mỗi ngày",
-    "ship": "🚚 Shop có giao hàng toàn quốc",
-    "menu": "📋 Menu:\n1️⃣ Sản phẩm A\n2️⃣ Sản phẩm B"
+    "tt1": ["link sp ", "mã giả cần áp :", "MAXBUFL2244","nhắn tin ,sos, để hiển thi hướng đẫn đặt"],
+    "hi": "tôi đây !",
+    "sos": ["1️⃣ Bước 1: vào link sản phẩm đã cung cấp ở trên để đặt hàng.",
+            "2️⃣ Bước 2: chỉ địa chỉ nhận hàng về , hà nội , hai bà trưng ,vinh tuy , trường đh kinh công, lưu ý nếu ship gọi thì gừi số ship cho tan để xử lý ",
+            "3️⃣ Bước 3: nhập mã giảm giá shop đã cung cấp khi chọn shop đặt",
+            "4️⃣ Bước 4: chụp ảnh dơn đã gửi cho tan để thanh toán khi dơn thanh công",
+            "lưu ý lên dùng 3g khi đặt hàng"],
+    
 }
 # Hàm xử lý tin nhắn
 def handle_message(text):
     text = text.lower()
 
-    for keyword, messages in FAQ.items():
-        if keyword in text:
+    for key, messages in FAQ.items():
+        if key in text:
             return messages   # trả về nhiều tin nhắn
 
     return ["🤖 Mình chưa hiểu câu hỏi."]
