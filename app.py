@@ -2,6 +2,7 @@ from flask import Flask, request
 import requests
 import os
 import datetime
+import FAQ
 
 app = Flask(__name__)
 
@@ -10,6 +11,7 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN")
 SECRET_TOKEN = "12345678"
 
 print("BOT_TOKEN:", BOT_TOKEN)
+
 
 
 @app.route("/bot", methods=["POST"])
@@ -43,19 +45,18 @@ def webhook():
         print("User ID:", user_id)
 
         # ===== XỬ LÝ KHÁC NHAU =====
-
+        reply = FAQ.handle_message(text)  # Gọi hàm xử lý tin nhắn từ FAQ.py
+        
         if chat_type == "private":
             if text == "/start":
-                reply = "👋 Xin chào!\nGõ /menu để xem chức năng."
+                for message in reply:
+                    send_message(chat_id, message)               
 
         elif chat_type == "group":
             reply = f"📢 {user_id} vừa nói trong nhóm: {text}"
 
         send_message(chat_id, reply)
     return "OK", 200
-# Hàm xử lý /start
-def start(update: Update, context):
-    update.message.reply_text(f"Xin chào {update.effective_user.first_name}!")
 
 def send_message(chat_id, text):
     url = f"https://bot-api.zaloplatforms.com/bot{BOT_TOKEN}/sendMessage"
@@ -77,5 +78,3 @@ def send_message(chat_id, text):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
-
