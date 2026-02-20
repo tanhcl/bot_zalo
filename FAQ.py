@@ -1,6 +1,6 @@
 FAQ = {
     "tt1": ["link sp ", "mã giả cần áp :", "MAXBUFL2244","nhắn tin ,sos, để hiển thi hướng đẫn đặt"],
-    "hi": "tôi đây !",
+    "hi": ["tôi đây !"],
     "sos": ["1️⃣ Bước 1: vào link sản phẩm đã cung cấp ở trên để đặt hàng.",
             "2️⃣ Bước 2: chỉ địa chỉ nhận hàng về , hà nội , hai bà trưng ,vinh tuy , trường đh kinh công, lưu ý nếu ship gọi thì gừi số ship cho tan để xử lý ",
             "3️⃣ Bước 3: nhập mã giảm giá shop đã cung cấp khi chọn shop đặt",
@@ -17,3 +17,4 @@ def handle_message(text):
             return messages   # trả về nhiều tin nhắn
 
     return ["🤖 Mình chưa hiểu câu hỏi."]
+
