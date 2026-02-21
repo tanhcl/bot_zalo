@@ -1,5 +1,5 @@
 FAQ = {
-    "tt1": ["link sp ", "mã giả cần áp :", "MAXBUFL2244","nhắn tin ,sos, để hiển thi hướng đẫn đặt"],
+    "tt1": ["link sp: https://vt.tiktok.com/ZSmurHves/ ", "mã giả cần áp :", "MAXBUFL2244","nhắn tin ,sos, để hiển thi hướng đẫn đặt"],
     "hi": ["tôi đây !"],
     "sos": ["1️⃣ Bước 1: vào link sản phẩm đã cung cấp ở trên để đặt hàng.",
             "2️⃣ Bước 2: chỉ địa chỉ nhận hàng về , hà nội , hai bà trưng ,vinh tuy , trường đh kinh công, lưu ý nếu ship gọi thì gừi số ship cho tan để xử lý ",
