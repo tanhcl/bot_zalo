@@ -1,5 +1,5 @@
 FAQ = {
-    "tt1": ["link sp: https://vt.tiktok.com/ZSmurHves/ ", "mã giả cần áp :", "MAXBUFL2244","nhắn tin ,sos, để hiển thi hướng đẫn đặt"],
+    "tt1": ["link sp 1: https://vt.tiktok.com/ZSmurHves/ ","link sp 2 : https://vt.tiktok.com/ZS9eBByfnjjwQ-iZi2i/","link sp 3: https://vt.tiktok.com/ZS9eBBXJNT37m-v2e0l/", "mã giả cần áp :", "SINH2004","nhắn tin ,sos, để hiển thi hướng đẫn đặt"],
     "hi": ["tôi đây !"],
     "sos": ["1️⃣ Bước 1: vào link sản phẩm đã cung cấp ở trên để đặt hàng.",
             "2️⃣ Bước 2: chỉ địa chỉ nhận hàng về , hà nội , hai bà trưng ,vinh tuy , trường đh kinh công, lưu ý nếu ship gọi thì gừi số ship cho tan để xử lý ",
@@ -17,4 +17,5 @@ def handle_message(text):
             return messages   # trả về nhiều tin nhắn
 
     return ["🤖 Mình chưa hiểu câu hỏi."]
+
 
