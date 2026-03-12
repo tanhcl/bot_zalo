@@ -13,12 +13,18 @@ UPSTASH_URL   = os.environ.get("UPSTASH_URL", "https://immortal-grizzly-69189.up
 UPSTASH_TOKEN = os.environ.get("UPSTASH_TOKEN", "gQAAAAAAAQ5FAAIncDEyMDk4YjgwZmRhNjg0YjY1OGMxNmEyMmI1NTI4YzNlMXAxNjkxODk")
 
 def _upstash(cmd_parts):
-    """Gọi Upstash REST API với lệnh Redis"""
+    """Gọi Upstash REST API với lệnh Redis (dùng POST để hỗ trợ value phức tạp)"""
     if not UPSTASH_URL or not UPSTASH_TOKEN:
         print("[storage] Chưa cấu hình UPSTASH_URL hoặc UPSTASH_TOKEN!")
         return None
-    url = UPSTASH_URL + "/" + "/".join(str(p) for p in cmd_parts)
-    resp = requests.get(url, headers={"Authorization": f"Bearer {UPSTASH_TOKEN}"})
+    resp = requests.post(
+        UPSTASH_URL,
+        headers={
+            "Authorization": f"Bearer {UPSTASH_TOKEN}",
+            "Content-Type": "application/json"
+        },
+        json=cmd_parts  # gửi command dạng ["SET", "key", "value"]
+    )
     if resp.status_code == 200:
         return resp.json().get("result")
     print(f"[storage] Lỗi {resp.status_code}: {resp.text}")
