@@ -65,6 +65,18 @@ def handle_admin(text, user_id, chat_id, send_fn, raw_message=None):
             send_fn(chat_id, msg)
         return True
 
+    # /mabuff <mã> — Đổi mã giảm giá
+    if text.startswith("/mabuff"):
+        parts = text.split(" ", 1)
+        if len(parts) == 2:
+            new_code = parts[1].strip()
+            import storage as st
+            st.save_mabuff(new_code)
+            send_fn(chat_id, f"✅ Đã cập nhật mã giảm giá mới: {new_code}")
+        else:
+            send_fn(chat_id, "❌ Dùng: /mabuff <mã>\nVí dụ: /mabuff KHUYENMAI2024")
+        return True
+
     # /xoalink <index> — xóa link theo vị trí
     if text.startswith("/xoalink"):
         parts = text.split(" ", 1)
@@ -97,7 +109,7 @@ def handle_admin(text, user_id, chat_id, send_fn, raw_message=None):
         for i, link in enumerate(links):
             if link:
                 broadcast_messages.append(f"🔥 link sp {i} : {link}")
-        broadcast_messages.append("🏷️ Mã giảm giá : SINH2004")
+        broadcast_messages.append(f"🏷️ Mã giảm giá : {FAQ.load_mabuff()}")
         broadcast_messages.append("📌 Nhắn 'sos' để xem hướng dẫn đặt hàng")
 
         if not broadcast_messages:
@@ -127,6 +139,7 @@ def handle_admin(text, user_id, chat_id, send_fn, raw_message=None):
             "/setlink <số> <url> — Cập nhật link sp\n"
             "/xoalink <số>       — Xóa link sp\n"
             "/xemlink            — Xem tất cả link\n"
+            "/mabuff <mã>        — Đổi mã giảm giá\n"
             "/sukien             — Gửi tt1 đến tất cả user\n"
             "/xemuser            — Xem danh sách user\n"
             "/help_admin         — Xem lệnh này\n"

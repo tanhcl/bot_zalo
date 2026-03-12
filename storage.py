@@ -41,6 +41,18 @@ def load_links():
 def save_links(links):
     _upstash(["SET", "links", json.dumps(links, ensure_ascii=False)])
 
+# -------- MABUFF --------
+
+def load_mabuff():
+    raw = _upstash(["GET", "mabuff"])
+    if raw:
+        return json.loads(raw)
+    return "SINH2004"  # Giá trị mặc định nếu chưa ai set
+
+def save_mabuff(code):
+    _upstash(["SET", "mabuff", json.dumps(code, ensure_ascii=False)])
+
+
 # -------- USERS --------
 
 def load_users():

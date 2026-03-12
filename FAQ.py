@@ -13,6 +13,9 @@ def load_links():
 def save_links(links):
     storage.save_links(links)
 
+def load_mabuff():
+    return storage.load_mabuff()
+
 FAQ_STATIC = {
     "hi": ["tôi đây !"],
     "sos": [
@@ -34,7 +37,7 @@ def handle_message(text):
         for i, link in enumerate(links):
             if link:
                 messages.append(f"link sp {i} : {link}")
-        messages.append("mã giảm giá cần áp : SINH2004")
+        messages.append(f"mã giảm giá cần áp : {load_mabuff()}")
         messages.append("nhắn tin ,sos, để hiển thị hướng dẫn đặt")
         return messages if messages else ["Chưa có link sản phẩm nào."]
 
