@@ -75,7 +75,7 @@ def webhook():
 
         # Điều phối: admin hay user thường?
         if user_id == ADMIN_ID:
-            handled = admin.handle_admin(text, user_id, chat_id, send_message)
+            handled = admin.handle_admin(text, user_id, chat_id, send_message, raw_message=message)
             if handled:
                 return "OK", 200
 

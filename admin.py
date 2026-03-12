@@ -6,11 +6,16 @@ import users
 # Thêm lệnh mới cho admin: chỉ cần thêm điều kiện vào handle_admin()
 # ================================================================
 
-def handle_admin(text, user_id, chat_id, send_fn):
+def handle_admin(text, user_id, chat_id, send_fn, raw_message=None):
     """
     Xử lý lệnh admin. Trả về True nếu đã xử lý, False nếu không phải lệnh admin.
     send_fn: hàm gửi tin nhắn (nhận chat_id, text)
     """
+
+    # /debug — xem bot đang nhận được text gì (để diagnose lỗi)
+    if text.startswith("/debug"):
+        send_fn(chat_id, f"🔍 Bot nhận text:\n[{text}]\n\nRaw message:\n{str(raw_message)[:500]}")
+        return True
 
     # /setlink <index> <url> — cập nhật link sản phẩm theo vị trí
     if text.startswith("/setlink"):
