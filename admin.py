@@ -17,20 +17,40 @@ def handle_admin(text, user_id, chat_id, send_fn, raw_message=None):
         send_fn(chat_id, f"🔍 Bot nhận text:\n[{text}]\n\nRaw message:\n{str(raw_message)[:500]}")
         return True
 
-    # /setlink <index> — Bước 1: ghi nhớ index, hỏi URL
+    # /setlink — cập nhật links theo format:
+    # /setlink
+    # [0] https://link0
+    # [1] https://link1
     if text.startswith("/setlink"):
-        parts = text.split()
-        if len(parts) >= 2:
-            try:
-                idx = int(parts[1])
-                # Lưu pending state vào Upstash (tự xóa sau 5 phút)
-                import storage as st
-                st.set_pending(f"pending_setlink_{user_id}", {"index": idx})
-                send_fn(chat_id, f"🔗 Nhập URL mới cho link sp {idx}:\n(Gửi URL thôi, không cần kèm lệnh)")
-            except ValueError:
-                send_fn(chat_id, "❌ Dùng: /setlink <số>\nVí dụ: /setlink 0")
+        lines = text.split("\n")
+        links = FAQ.load_links()
+        updated = []
+        for line in lines[1:]:  # bỏ dòng đầu "/setlink"
+            line = line.strip()
+            if not line:
+                continue
+            # Tìm pattern [N] url
+            import re
+            match = re.match(r'\[(\d+)\]\s*(https?://\S+)', line)
+            if match:
+                idx = int(match.group(1))
+                url = match.group(2)
+                while len(links) <= idx:
+                    links.append("")
+                links[idx] = url
+                updated.append(f"  [{idx}] {url}")
+
+        if updated:
+            FAQ.save_links(links)
+            send_fn(chat_id, "✅ Đã cập nhật:\n" + "\n".join(updated))
         else:
-            send_fn(chat_id, "❌ Dùng: /setlink <số>\nVí dụ: /setlink 0")
+            send_fn(chat_id,
+                "❌ Không tìm thấy link nào.\n\n"
+                "📝 Dùng đúng format:\n"
+                "/setlink\n"
+                "[0] https://link0\n"
+                "[1] https://link1"
+            )
         return True
 
     # /xemlink — xem toàn bộ links hiện tại
