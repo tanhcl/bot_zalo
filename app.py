@@ -75,11 +75,41 @@ def webhook():
 
         # Điều phối: admin hay user thường?
         if user_id == ADMIN_ID:
+            # Bước 2 của /setlink: khi admin gửi URL (text là URL hoặc text rỗng do Zalo tách)
+            import storage as st
+            pending = st.get_pending(f"pending_setlink_{user_id}")
+            if pending:
+                # Lấy URL từ text (nếu có) hoặc từ attachment của Zalo
+                url_to_save = text.strip() if text.strip() else None
+                # Thử lấy từ attachment nếu text rỗng
+                if not url_to_save:
+                    for field in ["href", "url", "link"]:
+                        url_to_save = message.get(field, "")
+                        if url_to_save:
+                            break
+                if url_to_save and (url_to_save.startswith("http") or url_to_save.startswith("www")):
+                    idx = pending["index"]
+                    links = FAQ.load_links()
+                    while len(links) <= idx:
+                        links.append("")
+                    links[idx] = url_to_save
+                    FAQ.save_links(links)
+                    st.clear_pending(f"pending_setlink_{user_id}")
+                    send_message(chat_id, f"✅ Đã lưu link sp {idx}:\n{url_to_save}")
+                    return "OK", 200
+                elif text and not text.startswith("/"):
+                    # Text không phải URL cũng không phải lệnh → hỏi lại
+                    send_message(chat_id, f"❌ Đây không phải URL. Vui lòng gửi URL bắt đầu bằng http://\nHoặc nhắn /huy để hủy.")
+                    return "OK", 200
+
             handled = admin.handle_admin(text, user_id, chat_id, send_message, raw_message=message)
             if handled:
                 return "OK", 200
-            # Không match lệnh nào → gửi raw data về cho admin tự debug
-            send_message(chat_id, f"⚙️ [Admin Debug]\nText nhận được:\n[{text}]\n\nFull data:\n{str(message)[:600]}")
+            # Text rỗng (Zalo link preview event) hoặc không match lệnh → bỏ qua
+            if not text:
+                return "OK", 200
+            # Có text nhưng không phải lệnh → debug cho admin
+            send_message(chat_id, f"⚙️ [Admin Debug]\nText nhận được:\n[{text}]")
             return "OK", 200
 
         # Xử lý tin nhắn user thường

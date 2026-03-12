@@ -53,3 +53,20 @@ def register_user(chat_id):
         current.append(chat_id)
         save_users(current)
         print(f"[storage] Đã đăng ký user mới: {chat_id}")
+
+# -------- PENDING STATE (cho /setlink 2 bước) --------
+
+def set_pending(key, value, expire_seconds=300):
+    """Lưu trạng thái chờ (tự xóa sau expire_seconds giây)"""
+    _upstash(["SET", key, json.dumps(value), "EX", expire_seconds])
+
+def get_pending(key):
+    """Lấy trạng thái chờ"""
+    raw = _upstash(["GET", key])
+    if raw:
+        return json.loads(raw)
+    return None
+
+def clear_pending(key):
+    """Xóa trạng thái chờ"""
+    _upstash(["DEL", key])

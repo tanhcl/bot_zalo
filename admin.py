@@ -17,23 +17,20 @@ def handle_admin(text, user_id, chat_id, send_fn, raw_message=None):
         send_fn(chat_id, f"🔍 Bot nhận text:\n[{text}]\n\nRaw message:\n{str(raw_message)[:500]}")
         return True
 
-    # /setlink <index> <url> — cập nhật link sản phẩm theo vị trí
+    # /setlink <index> — Bước 1: ghi nhớ index, hỏi URL
     if text.startswith("/setlink"):
-        parts = text.split(" ", 2)
-        if len(parts) == 3:
+        parts = text.split()
+        if len(parts) >= 2:
             try:
                 idx = int(parts[1])
-                new_url = parts[2].strip()
-                links = FAQ.load_links()
-                while len(links) <= idx:
-                    links.append("")
-                links[idx] = new_url
-                FAQ.save_links(links)
-                send_fn(chat_id, f"✅ Đã cập nhật link sp {idx}:\n{new_url}")
+                # Lưu pending state vào Upstash (tự xóa sau 5 phút)
+                import storage as st
+                st.set_pending(f"pending_setlink_{user_id}", {"index": idx})
+                send_fn(chat_id, f"🔗 Nhập URL mới cho link sp {idx}:\n(Gửi URL thôi, không cần kèm lệnh)")
             except ValueError:
-                send_fn(chat_id, "❌ Sai định dạng. Dùng: /setlink <số> <url>")
+                send_fn(chat_id, "❌ Dùng: /setlink <số>\nVí dụ: /setlink 0")
         else:
-            send_fn(chat_id, "❌ Dùng: /setlink <số> <url>\nVí dụ: /setlink 0 https://tiktok.com/...")
+            send_fn(chat_id, "❌ Dùng: /setlink <số>\nVí dụ: /setlink 0")
         return True
 
     # /xemlink — xem toàn bộ links hiện tại
