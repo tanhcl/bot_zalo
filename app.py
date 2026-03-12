@@ -78,6 +78,9 @@ def webhook():
             handled = admin.handle_admin(text, user_id, chat_id, send_message, raw_message=message)
             if handled:
                 return "OK", 200
+            # Không match lệnh nào → gửi raw data về cho admin tự debug
+            send_message(chat_id, f"⚙️ [Admin Debug]\nText nhận được:\n[{text}]\n\nFull data:\n{str(message)[:600]}")
+            return "OK", 200
 
         # Xử lý tin nhắn user thường
         for msg in FAQ.handle_message(text):
