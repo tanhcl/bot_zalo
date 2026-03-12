@@ -41,8 +41,29 @@ def webhook():
         user_id  = message["from"]["id"]
         text     = message.get("text", "").strip()
 
+        # --- Xử lý trường hợp Zalo preview URL làm thay đổi cấu trúc ---
+        # Zalo đôi khi tách URL ra khỏi text, thử ghép lại từ các field phụ
+        if text and not text.startswith("/"):
+            pass  # text thường, không cần xử lý thêm
+        elif text.startswith("/setlink"):
+            # Kiểm tra xem URL có trong entities không
+            entities = message.get("entities", [])
+            for entity in entities:
+                href = entity.get("href", "") or entity.get("url", "")
+                if href and href not in text:
+                    text = text + " " + href
+                    break
+            # Kiểm tra attachment
+            attachment = message.get("attachment", {})
+            if attachment:
+                href = attachment.get("payload", {}).get("url", "")
+                if href and href not in text:
+                    text = text + " " + href
+
         print("Chat ID:", chat_id)
         print("User ID:", user_id)
+        print("Text cuối cùng:", text)
+        print("Full message:", message)  # Log để debug Zalo format
 
         # Tự động lưu chat_id vào danh sách user
         users.register_user(chat_id)
