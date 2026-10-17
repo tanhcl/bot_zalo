@@ -7,9 +7,11 @@ from dotenv import load_dotenv
 import FAQ
 import admin
 import users
+from admin_web import admin_web
 
 load_dotenv()
 app = Flask(__name__)
+app.register_blueprint(admin_web)
 
 # ================================================================
 # APP.PY — Server chính, chỉ nhận webhook và điều phối
@@ -19,6 +21,7 @@ app = Flask(__name__)
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "").strip()
 SECRET_TOKEN = os.environ.get("SECRET_TOKEN", "").strip()
 ADMIN_ID = os.environ.get("ADMIN_ID", "a164988332d4db8a82c5")  # Lấy ADMIN_ID từ biến môi trường Render
+app.secret_key = os.environ.get("WEB_SESSION_SECRET", SECRET_TOKEN or os.urandom(32))
 
 
 @app.route("/bot", methods=["POST"])

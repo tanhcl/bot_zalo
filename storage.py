@@ -66,6 +66,20 @@ def load_products():
 def save_products(products):
     _upstash(["SET", "products", json.dumps(products, ensure_ascii=False)])
 
+
+def load_marketing():
+    raw = _upstash(["GET", "marketing"])
+    if raw:
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return []
+    return []
+
+
+def save_marketing(campaigns):
+    _upstash(["SET", "marketing", json.dumps(campaigns, ensure_ascii=False)])
+
 # -------- MABUFF --------
 
 def load_mabuff():
