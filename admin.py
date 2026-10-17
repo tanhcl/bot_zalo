@@ -12,6 +12,42 @@ def handle_admin(text, user_id, chat_id, send_fn, raw_message=None):
     send_fn: hàm gửi tin nhắn (nhận chat_id, text)
     """
 
+    import storage as st
+
+    # /themsp TM01 | Tên sản phẩm | 120000 | Mô tả | https://link
+    if text.startswith("/themsp"):
+        parts = [p.strip() for p in text.split("|", 4)]
+        command_parts = parts[0].split(maxsplit=1)
+        if len(parts) != 5 or len(command_parts) != 2:
+            send_fn(chat_id, "❌ Dùng: /themsp TM01 | Tên | Giá | Mô tả | Link")
+            return True
+        code = command_parts[1].upper()
+        products = st.load_products()
+        products[code] = {"code": code, "name": parts[1], "price": parts[2], "description": parts[3], "link": parts[4], "active": True}
+        st.save_products(products)
+        send_fn(chat_id, f"✅ Đã lưu sản phẩm {code}: {parts[1]}")
+        return True
+
+    if text == "/xemsp":
+        products = st.load_products()
+        if not products:
+            send_fn(chat_id, "Chưa có sản phẩm nào.")
+        else:
+            send_fn(chat_id, "📦 Sản phẩm:\n" + "\n".join(f"- {k}: {v['name']} ({v.get('price', 'Liên hệ')})" for k, v in products.items()))
+        return True
+
+    if text.startswith("/xoasp"):
+        parts = text.split(maxsplit=1)
+        products = st.load_products()
+        if len(parts) != 2 or parts[1].upper() not in products:
+            send_fn(chat_id, "❌ Dùng: /xoasp <mã sản phẩm>")
+        else:
+            code = parts[1].upper()
+            products[code]["active"] = False
+            st.save_products(products)
+            send_fn(chat_id, f"🗑️ Đã ẩn sản phẩm {code}.")
+        return True
+
     # /debug — xem bot đang nhận được text gì (để diagnose lỗi)
     if text.startswith("/debug"):
         send_fn(chat_id, f"🔍 Bot nhận text:\n[{text}]\n\nRaw message:\n{str(raw_message)[:500]}")
@@ -70,7 +106,6 @@ def handle_admin(text, user_id, chat_id, send_fn, raw_message=None):
         parts = text.split(" ", 1)
         if len(parts) == 2:
             new_code = parts[1].strip()
-            import storage as st
             st.save_mabuff(new_code)
             send_fn(chat_id, f"✅ Đã cập nhật mã giảm giá mới: {new_code}")
         else:
@@ -137,6 +172,9 @@ def handle_admin(text, user_id, chat_id, send_fn, raw_message=None):
         msg = (
             "🔑 Lệnh dành cho Admin:\n\n"
             "/setlink <số> <url> — Cập nhật link sp\n"
+            "/themsp <mã> | <tên> | <giá> | <mô tả> | <link> — Thêm sản phẩm\n"
+            "/xemsp              — Xem danh mục sản phẩm\n"
+            "/xoasp <mã>          — Ẩn sản phẩm\n"
             "/xoalink <số>       — Xóa link sp\n"
             "/xemlink            — Xem tất cả link\n"
             "/mabuff <mã>        — Đổi mã giảm giá\n"

@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: tan-minh-zalo-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 60
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: SECRET_TOKEN
+        generateValue: true
+      - key: ADMIN_ID
+        sync: false
+      - key: UPSTASH_URL
+        sync: false
+      - key: UPSTASH_TOKEN
+        sync: false

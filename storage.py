@@ -9,25 +9,36 @@ import json
 #   UPSTASH_TOKEN = REST Token từ upstash.com
 # ================================================================
 
-UPSTASH_URL   = os.environ.get("UPSTASH_URL", "https://immortal-grizzly-69189.upstash.io")
-UPSTASH_TOKEN = os.environ.get("UPSTASH_TOKEN", "gQAAAAAAAQ5FAAIncDEyMDk4YjgwZmRhNjg0YjY1OGMxNmEyMmI1NTI4YzNlMXAxNjkxODk")
+UPSTASH_URL = os.environ.get("UPSTASH_URL", "").strip()
+UPSTASH_TOKEN = os.environ.get("UPSTASH_TOKEN", "").strip()
+_memory = {}
 
 def _upstash(cmd_parts):
     """Gọi Upstash REST API với lệnh Redis (dùng POST để hỗ trợ value phức tạp)"""
     if not UPSTASH_URL or not UPSTASH_TOKEN:
-        print("[storage] Chưa cấu hình UPSTASH_URL hoặc UPSTASH_TOKEN!")
+        command = cmd_parts[0].upper()
+        key = cmd_parts[1] if len(cmd_parts) > 1 else ""
+        if command == "GET":
+            return _memory.get(key)
+        if command == "SET":
+            _memory[key] = cmd_parts[2]
+            return "OK"
+        if command == "DEL":
+            _memory.pop(key, None)
+            return 1
         return None
-    resp = requests.post(
-        UPSTASH_URL,
-        headers={
-            "Authorization": f"Bearer {UPSTASH_TOKEN}",
-            "Content-Type": "application/json"
-        },
-        json=cmd_parts  # gửi command dạng ["SET", "key", "value"]
-    )
-    if resp.status_code == 200:
-        return resp.json().get("result")
-    print(f"[storage] Lỗi {resp.status_code}: {resp.text}")
+    try:
+        resp = requests.post(
+            UPSTASH_URL,
+            headers={"Authorization": f"Bearer {UPSTASH_TOKEN}", "Content-Type": "application/json"},
+            json=cmd_parts,
+            timeout=10,
+        )
+        if resp.status_code == 200:
+            return resp.json().get("result")
+        print(f"[storage] Lỗi {resp.status_code}: {resp.text[:300]}")
+    except requests.RequestException as exc:
+        print(f"[storage] Không kết nối được Upstash: {exc}")
     return None
 
 # -------- LINKS --------
@@ -40,6 +51,20 @@ def load_links():
 
 def save_links(links):
     _upstash(["SET", "links", json.dumps(links, ensure_ascii=False)])
+
+
+def load_products():
+    raw = _upstash(["GET", "products"])
+    if raw:
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+
+def save_products(products):
+    _upstash(["SET", "products", json.dumps(products, ensure_ascii=False)])
 
 # -------- MABUFF --------
 
@@ -70,13 +95,16 @@ def register_user(chat_id):
     if chat_id not in current:
         current.append(chat_id)
         save_users(current)
-        print(f"[storage] Đã đăng ký user mới: {chat_id}")
+        print(f"[storage] Registered new user: {chat_id}")
 
 # -------- PENDING STATE (cho /setlink 2 bước) --------
 
 def set_pending(key, value, expire_seconds=300):
     """Lưu trạng thái chờ (tự xóa sau expire_seconds giây)"""
-    _upstash(["SET", key, json.dumps(value), "EX", expire_seconds])
+    if not UPSTASH_URL or not UPSTASH_TOKEN:
+        _memory[key] = json.dumps(value, ensure_ascii=False)
+    else:
+        _upstash(["SET", key, json.dumps(value), "EX", expire_seconds])
 
 def get_pending(key):
     """Lấy trạng thái chờ"""

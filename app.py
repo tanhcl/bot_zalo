@@ -2,10 +2,13 @@ from flask import Flask, request
 import requests
 import os
 import datetime
+import json
+from dotenv import load_dotenv
 import FAQ
 import admin
 import users
 
+load_dotenv()
 app = Flask(__name__)
 
 # ================================================================
@@ -13,27 +16,30 @@ app = Flask(__name__)
 # Không cần sửa file này khi thêm lệnh mới
 # ================================================================
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-SECRET_TOKEN = "12345678"
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "").strip()
+SECRET_TOKEN = os.environ.get("SECRET_TOKEN", "").strip()
 ADMIN_ID = os.environ.get("ADMIN_ID", "a164988332d4db8a82c5")  # Lấy ADMIN_ID từ biến môi trường Render
-
-print("BOT_TOKEN:", BOT_TOKEN)
 
 
 @app.route("/bot", methods=["POST"])
 def webhook():
     # Kiểm tra secret token
     received_secret = request.headers.get("X-Bot-Api-Secret-Token")
-    if received_secret != SECRET_TOKEN:
+    if not SECRET_TOKEN or received_secret != SECRET_TOKEN:
         return "sai secret token", 403
 
-    data = request.json
-    print("Received data:", data)
+    if not BOT_TOKEN:
+        return "chua cau hinh BOT_TOKEN", 503
+
+    data = request.get_json(silent=True) or {}
+    safe_log = json.dumps(data, ensure_ascii=True, default=str)
+    print("Received data:", safe_log)
 
     # Ghi log
     with open("log.txt", "a") as f:
         f.write(f"CALLED {datetime.datetime.now()}\n")
-        f.write(str(data) + "\n\n")
+        safe_data = {"message": {"chat": data.get("message", {}).get("chat", {}), "text": data.get("message", {}).get("text", "")}}
+        f.write(json.dumps(safe_data, ensure_ascii=True) + "\n\n")
 
     if "message" in data:
         message = data["message"]
@@ -62,8 +68,8 @@ def webhook():
 
         print("Chat ID:", chat_id)
         print("User ID:", user_id)
-        print("Text cuối cùng:", text)
-        print("Full message:", message)  # Log để debug Zalo format
+        print("Text cuoi cung:", text.encode("ascii", "backslashreplace").decode("ascii"))
+        print("Full message:", json.dumps(message, ensure_ascii=True, default=str))  # Log để debug Zalo format
 
         # Tự động lưu chat_id vào danh sách user
         users.register_user(chat_id)
@@ -124,8 +130,8 @@ def send_message(chat_id, text):
     payload = {"chat_id": chat_id, "text": text}
     response = requests.post(url, json=payload)
     print("=== SEND MESSAGE ===")
-    print("Payload:", payload)
-    print("Response:", response.text)
+    print("Payload:", json.dumps(payload, ensure_ascii=True))
+    print("Response:", response.text.encode("ascii", "backslashreplace").decode("ascii"))
     print("====================")
 
 
