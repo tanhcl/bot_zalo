@@ -35,13 +35,17 @@ def webhook():
     safe_log = json.dumps(data, ensure_ascii=True, default=str)
     print("Received data:", safe_log)
 
+    # Zalo gửi sự kiện này khi đăng ký/kiểm tra webhook; nó không có chat.
+    if data.get("event_name") == "webhook.test":
+        return "OK", 200
+
     # Ghi log
     with open("log.txt", "a") as f:
         f.write(f"CALLED {datetime.datetime.now()}\n")
         safe_data = {"message": {"chat": data.get("message", {}).get("chat", {}), "text": data.get("message", {}).get("text", "")}}
         f.write(json.dumps(safe_data, ensure_ascii=True) + "\n\n")
 
-    if "message" in data:
+    if "message" in data and data["message"].get("chat") and data["message"].get("from"):
         message = data["message"]
         chat_id  = message["chat"]["id"]
         user_id  = message["from"]["id"]
