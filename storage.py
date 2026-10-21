@@ -227,6 +227,20 @@ def record_message(message):
     history.append(message)
     save_message_history(history)
 
+
+def load_conversations():
+    raw = _upstash(["GET", "conversations"])
+    if raw:
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+
+def save_conversations(conversations):
+    _upstash(["SET", "conversations", json.dumps(conversations, ensure_ascii=False)])
+
 # -------- PENDING STATE (cho /setlink 2 bước) --------
 
 def set_pending(key, value, expire_seconds=300):

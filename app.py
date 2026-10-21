@@ -160,7 +160,7 @@ def webhook():
             return "OK", 200
 
         # Xử lý tin nhắn user thường
-        for msg in FAQ.handle_message(text):
+        for msg in FAQ.handle_message(text, chat_id=chat_id):
             send_message(chat_id, msg)
 
     return "OK", 200
