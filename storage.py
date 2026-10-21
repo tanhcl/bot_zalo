@@ -80,6 +80,48 @@ def load_marketing():
 def save_marketing(campaigns):
     _upstash(["SET", "marketing", json.dumps(campaigns, ensure_ascii=False)])
 
+
+def load_orders():
+    raw = _upstash(["GET", "orders"])
+    if raw:
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return []
+    return []
+
+
+def save_orders(orders):
+    _upstash(["SET", "orders", json.dumps(orders, ensure_ascii=False)])
+
+
+def load_broadcasts():
+    raw = _upstash(["GET", "broadcasts"])
+    if raw:
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return []
+    return []
+
+
+def save_broadcasts(drafts):
+    _upstash(["SET", "broadcasts", json.dumps(drafts, ensure_ascii=False)])
+
+
+def load_settings():
+    raw = _upstash(["GET", "settings"])
+    if raw:
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+
+def save_settings(settings):
+    _upstash(["SET", "settings", json.dumps(settings, ensure_ascii=False)])
+
 # -------- MABUFF --------
 
 def load_mabuff():
