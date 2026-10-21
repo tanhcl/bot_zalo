@@ -153,6 +153,80 @@ def register_user(chat_id):
         save_users(current)
         print(f"[storage] Registered new user: {chat_id}")
 
+
+# -------- CONTACTS / GROUPS / MESSAGE HISTORY --------
+
+def load_contacts():
+    raw = _upstash(["GET", "contacts"])
+    if raw:
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+
+def save_contacts(contacts):
+    _upstash(["SET", "contacts", json.dumps(contacts, ensure_ascii=False)])
+
+
+def upsert_contact(contact_id, **fields):
+    contacts = load_contacts()
+    key = str(contact_id)
+    current = contacts.get(key, {"id": key, "messages": 0, "status": "active"})
+    current.update({k: v for k, v in fields.items() if v is not None})
+    current["id"] = key
+    current["messages"] = int(current.get("messages", 0)) + 1
+    contacts[key] = current
+    save_contacts(contacts)
+    return current
+
+
+def load_groups():
+    raw = _upstash(["GET", "groups"])
+    if raw:
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+
+def save_groups(groups):
+    _upstash(["SET", "groups", json.dumps(groups, ensure_ascii=False)])
+
+
+def upsert_group(group_id, **fields):
+    groups = load_groups()
+    key = str(group_id)
+    current = groups.get(key, {"id": key, "messages": 0, "status": "active", "enabled": True})
+    current.update({k: v for k, v in fields.items() if v is not None})
+    current["id"] = key
+    current["messages"] = int(current.get("messages", 0)) + 1
+    groups[key] = current
+    save_groups(groups)
+    return current
+
+
+def load_message_history():
+    raw = _upstash(["GET", "message_history"])
+    if raw:
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return []
+    return []
+
+
+def save_message_history(messages):
+    _upstash(["SET", "message_history", json.dumps(messages[-2000:], ensure_ascii=False)])
+
+
+def record_message(message):
+    history = load_message_history()
+    history.append(message)
+    save_message_history(history)
+
 # -------- PENDING STATE (cho /setlink 2 bước) --------
 
 def set_pending(key, value, expire_seconds=300):

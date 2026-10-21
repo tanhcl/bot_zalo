@@ -81,6 +81,40 @@ def webhook():
         # Tự động lưu chat_id vào danh sách user
         users.register_user(chat_id)
 
+        # Lưu hồ sơ chat để Admin có thể quản lý từng người và từng nhóm.
+        import storage as st
+        chat = message.get("chat", {})
+        chat_type = str(chat.get("chat_type", "PRIVATE")).upper()
+        is_group = chat_type in {"GROUP", "SUPERGROUP", "GROUP_CHAT"}
+        sender_name = message.get("from", {}).get("display_name", "")
+        event_time = data.get("date") or datetime.datetime.now(datetime.timezone.utc).isoformat()
+        if is_group:
+            group = st.upsert_group(
+                chat_id,
+                name=chat.get("title") or chat.get("name") or f"Nhóm {chat_id}",
+                chat_type=chat_type,
+                last_message_at=event_time,
+            )
+            if not group.get("enabled", True):
+                return "OK", 200
+        else:
+            st.upsert_contact(
+                user_id,
+                chat_id=chat_id,
+                name=sender_name or f"Khách {user_id}",
+                chat_type=chat_type,
+                last_message_at=event_time,
+            )
+        st.record_message({
+            "id": message.get("message_id", ""),
+            "chat_id": str(chat_id),
+            "user_id": str(user_id),
+            "chat_type": chat_type,
+            "sender_name": sender_name,
+            "text": text,
+            "created_at": event_time,
+        })
+
         # /myid — ai nhắn cũng được, trả về ID của chính họ
         if text == "/myid":
             send_message(chat_id, f"🪪 ID Zalo của bạn là:\n{user_id}")
